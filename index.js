@@ -1,7 +1,10 @@
 const express = require('express');
 const hbs = require('hbs')
 const wax = require('wax-on');
-
+var helpers = require('handlebars-helpers')({
+    handlebars: hbs.handlebars
+  });
+  
 const app = express();
 
 app.set('view engine', 'hbs');
