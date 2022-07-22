@@ -11,10 +11,14 @@ app.use(express.static('public'))
 
 // setup wax-on
 wax.on(hbs.handlebars);
+wax.setLayoutPath('./views/layouts')
 
 const landingRoutes = require('./routes/landing');
+const productRoutes = require('./routes/products');
 
+// first arg is the prefix
 app.use('/', landingRoutes);
+app.use('/products', productRoutes);
 
 app.listen(3000, function(){
     console.log("Server has started");
