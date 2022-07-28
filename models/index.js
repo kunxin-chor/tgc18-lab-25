@@ -7,7 +7,22 @@ const bookshelf = require('../bookshelf'); //
 // must be the SINGULAR form of the table name
 // and the first letter MUST be uppercase
 const Product = bookshelf.model('Product', {
-    tableName: 'products'
+    tableName: 'products',
+    // for the belongsTo, the name of the function is the name of the relationship
+    // the name MUST match the model name, but singular and always lowercase
+    category: function(){
+        return this.belongsTo('Category');
+    }
 })
 
-module.exports = { Product };
+const Category = bookshelf.model('Category',{
+    tableName: 'categories',
+    // the name of the function for a HasMany relationship
+    // should be the plural form of the corrsponding model in plural form
+    // and all lower case
+    products:function(){
+        return this.hasMany('Product')
+    }
+})
+
+module.exports = { Product, Category };
