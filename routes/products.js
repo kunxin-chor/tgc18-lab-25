@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router();
 
 // import in the Product model
-const { Product, Category } = require('../models')
+const { Product, Category, Tag } = require('../models')
 const { createProductForm, bootstrapField } = require('../forms')
 
 router.get('/', async function (req, res) {
@@ -10,7 +10,7 @@ router.get('/', async function (req, res) {
     // use the bookshelf syntax 
     // => select * from products
     let products = await Product.collection().fetch({
-        'withRelated':['category']
+        'withRelated':['category', 'tags']
     });
     res.render('products/index', {
         products: products.toJSON()
@@ -24,13 +24,18 @@ router.get('/create', async function (req, res) {
         return [category.get('id'), category.get('name')]
     });
 
+    const tags = await Tag.fetchAll().map(tag => {
+        return [tag.get('id'), tag.get('name')]
+    });
+
     // if not using map function
     // const c = [];
     // for (let c of (await Category.fetchAll())) {
     //     c.push([c.get('id'), c.get('name')])
     // }
 
-    const productForm = createProductForm(categories);
+    const productForm = createProductForm(categories, tags);
+
     res.render('products/create', {
         // get a HTML version of the form formatted using bootstrap
         form: productForm.toHTML(bootstrapField)
@@ -61,6 +66,11 @@ router.post('/create', async function (req, res) {
             product.set('category_id', form.data.category_id);
             // must remeber to save
             await product.save();
+            if (form.data.tags) {
+                // form.data.tags will contain the IDs of the selected tag seprated by a comma
+                // for example: "1,3"
+                await product.tags().attach(form.data.tags.split(','))
+            }
             res.redirect('/products')
 
         },
