@@ -93,19 +93,32 @@ router.get('/:product_id/update', async function (req, res) {
     const product = await Product.where({
         'id': req.params.product_id
     }).fetch({
+        withRelated:['tags'], // fetch all the tags associated with the product
         require: true  // if not found will cause an exception (aka an error)
     })
     // 2. create the form to update the product
     const categories = await Category.fetchAll().map(category => {
         return [category.get('id'), category.get('name')]
     });
-    const productForm = createProductForm(categories);
+
+    const tags = await Tag.fetchAll().map( t => {
+        return [t.get('id'), t.get('name')]
+    })
+
+    const productForm = createProductForm(categories, tags);
 
     // 3. fill the form with the previous values of the product
     productForm.fields.name.value = product.get('name');
     productForm.fields.cost.value = product.get('cost');
     productForm.fields.description.value = product.get('description');
     productForm.fields.category_id.value = product.get('category_id');
+
+    // fill in the multi-select for tags
+    // product.related('tags') will return an array of tag objects
+    // use pluck to retrieve only the id from each tag object
+    let selectedTags = await product.related('tags').pluck('id');
+    console.log(selectedTags);
+    productForm.fields.tags.value = selectedTags;
 
     res.render('products/update', {
         'form': productForm.toHTML(bootstrapField),
@@ -123,6 +136,7 @@ router.post('/:product_id/update', async function (req, res) {
     const product = await Product.where({
         'id': req.params.product_id
     }).fetch({
+        withRelated:['tags'],
         require: true  // if not found will cause an exception (aka an error)
     })
 
@@ -135,10 +149,31 @@ router.post('/:product_id/update', async function (req, res) {
             // product.set('description', form.data.description);
             // product.set('cost', form.data.cost);
             // product.set('category_id, form.data.category_id);
-            product.set(form.data);  // for the shortcut to work,
+            let { tags, ...productData} = form.data;
+          
+            product.set(productData);  // for the shortcut to work,
+            await product.save();
             // all the keys in form.data object
             // must be a column name in the table
-            await product.save();
+
+            // get all the selected tags as an array
+            let tagIds = tags.split(',').map( id => parseInt(id));
+            // get an array that contains the ids of the existing tags
+            let existingTagIds = await product.related('tags').pluck('id');
+
+            // remove all the current tags that are not selected anymore
+            let toRemove = existingTagIds.filter( id => tagIds.includes(id) === false)
+     
+            await product.tags().detach(toRemove)
+
+            // add in all the tags from the form that are not in the product
+            await product.tags().attach(tagIds);
+
+            // alternate method (easier to implement but less efficient)
+            // await products.tags.detach(existingTagIds);
+            // await product.tags.attach(tagIds);
+
+       
             res.redirect('/products')
         },
         'error': async function (form) {
