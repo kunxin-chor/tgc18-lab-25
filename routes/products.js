@@ -71,7 +71,10 @@ router.post('/create', async function (req, res) {
                 // for example: "1,3"
                 await product.tags().attach(form.data.tags.split(','))
             }
+            // req.flash is available because we did a app.use(flash()) inside index.js
+            req.flash("success_messages", `New product ${product.get('name')} has been created`)
             res.redirect('/products')
+
 
         },
         'error': function (form) {
