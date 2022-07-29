@@ -48,4 +48,50 @@ router.get('/login', async function(req,res){
     })
 })
 
+router.post('/login', async function(req,res){
+    const loginForm = createLoginForm();
+    loginForm.handle(req,{
+        'success':async function(form){
+            const user = await User.where({
+                'email': form.data.email,
+                'password': form.data.password
+            }).fetch({
+                require:false
+            })
+            
+            // check if the user does not exist
+            if (!user) {
+                req.flash('error_messages', "Invalid credentials");
+                res.redirect("/users/login");
+            } else {
+                req.session.user = {
+                    id: user.get('id'),
+                    email: user.get('email'),
+                    username: user.get('username')
+                }
+                req.flash('success_messages', 'Welcome back, ' + user.get('username'));
+                res.redirect('/products');
+            }
+        }
+    })
+})
+
+router.get('/profile', async function(req,res){
+    const user = req.session.user;
+    if (!user) {
+        req.flash('error_messages', 'Only logged in users may view this page');
+        res.redirect('/users/login')
+    } else {
+        res.render('users/profile',{
+            user: req.session.user
+        })
+    }
+})
+
+router.get('/logout', function(req,res){
+    req.session.user = null;
+    req.flash('success_messages', "You have been logged out");
+    res.redirect('/users/login')
+})
+
 module.exports = router;
