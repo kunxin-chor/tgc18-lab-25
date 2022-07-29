@@ -11,9 +11,16 @@ const flash = require('connect-flash');
 // create a new session FileStore
 const FileStore = require('session-file-store')(session);
 
+// csrf token
+const csrf = require('csurf');
+
 const app = express();
 
 app.set('view engine', 'hbs');
+
+app.use(express.urlencoded({
+  extended: false
+}))
 
 // static folder
 app.use(express.static('public'))
@@ -30,6 +37,24 @@ app.use(session({
   saveUninitialized: true, // if a new browser connects do we create a new session
 }))
 
+// enable csrf protection
+
+app.use(function(req,res,next){
+  console.log("req.body ==>", req.body);
+  next();
+})
+
+app.use(csrf());
+
+app.use(function(req,res,next){
+
+  // the csrfToken function is avaliable because of `app.use(csrf())`
+  res.locals.csrfToken = req.csrfToken(); 
+  console.log(req.csrfToken());
+  next();
+
+})
+
 // register Flash messages
 app.use(flash());  // VERY IMPORTANT: register flash after sessions
 
@@ -40,6 +65,7 @@ app.use(function(req,res,next){
   res.locals.error_messages = req.flash('error_messages');
   next();
 })
+
 
 const landingRoutes = require('./routes/landing');
 const productRoutes = require('./routes/products');
