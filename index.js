@@ -53,7 +53,6 @@ app.use(function(req,res,next){
 
   // the csrfToken function is avaliable because of `app.use(csrf())`
   res.locals.csrfToken = req.csrfToken(); 
-  console.log(req.csrfToken());
   next();
 
 })
@@ -68,7 +67,6 @@ app.use(function(req,res,next){
   res.locals.error_messages = req.flash('error_messages');
   next();
 })
-
 
 const landingRoutes = require('./routes/landing');
 const productRoutes = require('./routes/products');
