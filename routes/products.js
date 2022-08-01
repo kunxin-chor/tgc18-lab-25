@@ -54,6 +54,7 @@ router.get('/', async function (req, res) {
                 // eqv. SELECT * from products join products_tags ON
                 //              products.id = product_id
                 //              where tag_id IN (<selected tags ID>)
+                // this method looks for OR 
                 query.query('join', 'products_tags', 'products.id', 'product_id')
                  .where('tag_id', 'in', form.data.tags.split(','));
             }
