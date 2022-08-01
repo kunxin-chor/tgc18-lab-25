@@ -35,7 +35,7 @@ wax.setLayoutPath('./views/layouts')
 // setup sessions
 app.use(session({
   store: new FileStore(),  // we want to use files to store sessions
-  secret: 'keyboard cat', // used to generate the session id
+  secret: process.env.SESSION_SECRET, // used to generate the session id
   resave: false, // do we automatically recreate the session even if there is no change to it
   saveUninitialized: true, // if a new browser connects do we create a new session
 }))
