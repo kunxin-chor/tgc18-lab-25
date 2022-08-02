@@ -1,16 +1,41 @@
-To start mysql, in the terminal, type in `mysql -u root`
+# How to setup
 
-# Create a new database user
-In the MySQL CLI:
-```
-CREATE USER 'ahkow'@'localhost' IDENTIFIED BY 'rotiprata123';
-```
+1. Update database connections in `database.json`
 
+2. Log into mysql client with `mysql -u root`
+
+3. Create a new database user with the following commands
 ```
-GRANT ALL PRIVILEGES on sakila.* TO 'ahkow'@'localhost' WITH GRANT OPTION;
-```
-**Note:** Replace *sakila* with the name of the database you want the user to have access to
- 
- ```
+CREATE USER 'foo'@'%' IDENTIFIED WITH mysql_native_password BY 'bar';
+grant all privileges on *.* to 'foo'@'%';
+
 FLUSH PRIVILEGES;
+```
+
+4. Create a new database named `organic`
+
+5. Exit mysql client (or open a new terminal)
+
+6. Install nodemon with `npm install -g nodemon`
+
+6. Add permission to run ./db-migrate.sh with `chmod +x ./db-migrate.sh
+
+7. Install all node modules with `yarn install`
+
+8. Run all migrations with `./db-migrate.sh up`
+
+# Sample .env file
+```
+CLOUDINARY_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+CLOUDINARY_UPLOAD_PRESET=
+DB_DRIVER=mysql
+DB_USER=foo
+DB_PASSWORD=bar
+DB_DATABASE=organic
+DB_HOST=localhost
+SESSION_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
 ```
