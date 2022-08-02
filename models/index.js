@@ -42,4 +42,14 @@ const User = bookshelf.model('User',{
     'tableName':'users'
 })
 
-module.exports = { Product, Category, Tag, User };
+const CartItem = bookshelf.model('CartItem',{
+    tableName: 'cart_items',
+    product() {
+        return this.belongsTo('Product'); // arg refers to a model name
+    },
+    user() {
+        return this.belongsTo('User');
+    }
+})
+
+module.exports = { Product, Category, Tag, User, CartItem };
